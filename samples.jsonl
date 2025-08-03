@@ -1,2 +1,2 @@
-{"a": "A", "b": "B"}
-{"a": "C", "b": "D"}
+{"input": "sample data 1", "contrast": "sample contrast 1"}
+{"input": "sample data 2", "contrast": "sample contrast 2"}

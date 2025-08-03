@@ -16,7 +16,34 @@ Welcome to the SeeD Reboot initiative! This guide will help you get started with
    poetry install
    ```
 
-## Running Cycles
+## Database Setup
+
+To use Postgres with the async runner, follow these steps:
+
+1. **Install Postgres:**
+   Ensure you have Postgres installed on your system. You can download it from [PostgreSQL's official site](https://www.postgresql.org/download/).
+
+2. **Install asyncpg:**
+   If not already installed, run:
+   ```bash
+   pip install asyncpg
+   ```
+
+3. **Create the database:**
+   ```bash
+   createdb seed
+   ```
+
+4. **Set the DB_URL environment variable:**
+   ```bash
+   export DB_URL="postgresql://user:pass@localhost/seed"
+   ```
+
+5. **Run the async runner:**
+   ```bash
+   poetry run seed-run --async --cycles 1000
+   ```
+
 
 To run the SeeD CLI for a specified number of cycles, use:
 ```bash

@@ -4,6 +4,7 @@ cycles = 100
 sense = "default"
 delta = "ascii"
 metrics_port = 8000
+db_url = ""  # leave blank for sqlite; set to "postgresql://user:pass@localhost/seed"
 
 [paths]
 sense_file = "sample.txt"
