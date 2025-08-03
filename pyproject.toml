@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "seed"
+version = "0.1.0"
+description = "A project for the SeeD Reboot initiative."
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+sqlite3 = "*"
+dataclasses = "*"
+hashlib = "*"
+logging = "*"
+pytest = "*"
+hypothesis = "*"
+rich = "*"
+pydantic = { version = "*", optional = true }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
