@@ -6,7 +6,8 @@ import pathlib
 import sqlite3
 import time
 from hashlib import sha256
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, List
+from dataclasses import dataclass, astuple
 
 _DB_PATH = pathlib.Path(__file__).parent.parent.parent / "memory_log.db"
 
@@ -23,6 +24,18 @@ CREATE TABLE IF NOT EXISTS events (
 """
 
 
+@dataclass
+class Event:
+    id: int
+    ts: str
+    inp: str
+    contrast: str
+    delta: float
+    flag: str
+
+    def as_row(self):
+        return map(str, astuple(self))
+
 class MemoryLog:
     """Lightweight wrapper around an SQLite WAL ledger."""
 
@@ -33,7 +46,7 @@ class MemoryLog:
         self._conn.execute(_SCHEMA_SQL)
 
     # ── Public API ────────────────────────────────────────────────────
-    def append(self, record: Dict[str, Any]) -> int:
+    def append(self, record: Dict[str, Any]) -> Event:
         """Insert *record* and return the row‑id.
 
         The input *record* **must** contain keys: inp, contrast, delta, flag.
@@ -60,17 +73,19 @@ class MemoryLog:
                    VALUES (:ts, :inp, :contrast, :delta, :flag, :hash)""",
                 enriched,
             )
-            return cur.lastrowid
+            event_id = cur.lastrowid
+            return Event(event_id, enriched["ts"], enriched["inp"], enriched["contrast"], enriched["delta"], enriched["flag"])
 
-    def get_last_n_events(self, n: int):
+    def get_last_n_events(self, n: int) -> List[Event]:
         """Retrieve the last n events from the log."""
         with self._conn as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT id, inp, contrast, delta, flag FROM events ORDER BY id DESC LIMIT ?",
+                "SELECT id, ts, inp, contrast, delta, flag FROM events ORDER BY id DESC LIMIT ?",
                 (n,)
             )
-            return cur.fetchall()
+            rows = cur.fetchall()
+            return [Event(id, ts, inp, contrast, delta, flag) for id, ts, inp, contrast, delta, flag in rows]
 
     def __del__(self):  # noqa: D401 – destructor to close handle
         try:

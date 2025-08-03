@@ -15,8 +15,8 @@ from typing import Iterator
 _TEST_STRING: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 _cycle: Iterator[str] = itertools.cycle(_TEST_STRING)
 
-def read(*, stdin: bool = False) -> tuple[str, str]:  # noqa: D401 – we like imperative style
-    """Yield two ASCII characters.
+def read_pair(*, stdin: bool = False) -> tuple[str, str]:  # noqa: D401 – we like imperative style
+    """Yield a pair of ASCII characters.
 
     If *stdin* is True and there is data waiting, pop one byte from STDIN.
     Otherwise return the next char from an infinite test‑string cycle.
@@ -25,5 +25,9 @@ def read(*, stdin: bool = False) -> tuple[str, str]:  # noqa: D401 – we like i
         char = sys.stdin.read(1)
         if char:
             return char[0], next(_cycle)
-    # Fallback to test corpus
+
     return next(_cycle), next(_cycle)
+
+__all__ = ["read_pair"]
+
+# Fallback to test corpus

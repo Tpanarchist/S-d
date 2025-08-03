@@ -1,7 +1,7 @@
 import argparse
 from rich.table import Table
 from rich.console import Console
-from seed.core.sense_bus import read
+from seed.core.sense_bus import read_pair
 from seed.core.dyad_engine import delta
 from seed.core.boredom import BoredomThermostat
 from seed.core.memory_log import MemoryLog
@@ -17,10 +17,10 @@ def main():
     boredom_thermostat = BoredomThermostat()
 
     for cycle in range(1, args.cycles + 1):
-        inp, contrast = read()
+        inp, contrast = read_pair()
         d = delta(inp, contrast)
         flag = boredom_thermostat.update(d)
-        memory_log.append({"inp": inp, "contrast": contrast, "delta": d, "flag": flag})
+        event = memory_log.append({"inp": inp, "contrast": contrast, "delta": d, "flag": flag})
 
         if cycle % 5 == 0:
             table = Table(title="Recent Events")
@@ -31,7 +31,7 @@ def main():
             table.add_column("Flag", style="yellow")
 
             for event in memory_log.get_last_n_events(5):
-                table.add_row(str(event[0]), event[1], event[2], f"{event[3]:.4f}", str(event[4]))
+                table.add_row(*event.as_row())
 
             console.print(table)
 

@@ -2,7 +2,8 @@
 from seed.core import boredom as _boredom  # noqa: D401 – underscore artsy
 from seed.core import dyad_engine as de
 from seed.core import memory_log as ml
-from seed.core import sense_bus as sb
+from seed.core.sense_bus import read_pair
+from seed.core.memory_log import Event
 
 
 def test_delta_basic():
@@ -12,8 +13,9 @@ def test_delta_basic():
 
 def test_memory_append_and_hash():
     log = ml.MemoryLog(":memory:")
-    rowid = log.append({"inp": "A", "contrast": "B", "delta": 1.0, "flag": "explore"})
-    assert rowid == 1
+    event = log.append({"inp": "A", "contrast": "B", "delta": 1.0, "flag": "explore"})
+    assert isinstance(event, Event)
+    assert event.id == 1
 
 
 def test_boredom_states():
@@ -24,6 +26,6 @@ def test_boredom_states():
 
 
 def test_sense_bus_cycle():
-    first = sb.read()
-    second = sb.read()
+    first = read_pair()
+    second = read_pair()
     assert first != second  # because the test corpus cycles

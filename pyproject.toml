@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seed"
-version = "0.1.0"
+version = "0.1.0.dev2"
 description = "A project for the SeeD Reboot initiative."
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
