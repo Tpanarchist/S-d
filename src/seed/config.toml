@@ -1,0 +1,10 @@
+# User-editable defaults for SeeD
+
+cycles = 100
+sense = "default"
+delta = "ascii"
+metrics_port = 8000
+
+[paths]
+sense_file = "sample.txt"
+sense_jsonl = "samples.jsonl"

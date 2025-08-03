@@ -9,13 +9,22 @@ from __future__ import annotations
 
 import itertools
 import sys
-from typing import Iterator
+from typing import Iterator, Callable
 
 # Cyclic fallback corpus for quick unit tests.
 _TEST_STRING: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 _cycle: Iterator[str] = itertools.cycle(_TEST_STRING)
 
-def read_pair(*, stdin: bool = False) -> tuple[str, str]:  # noqa: D401 – we like imperative style
+SENSE_REGISTRY: dict[str, Callable[[], Iterator[tuple[str, str]]]] = {}
+
+def register(name: str) -> Callable[[Callable[[], Iterator[tuple[str, str]]]], Callable[[], Iterator[tuple[str, str]]]]:
+    def deco(fn):
+        SENSE_REGISTRY[name] = fn
+        return fn
+    return deco
+
+@register("default")
+def read_pair(*, stdin: bool = False) -> Iterator[tuple[str, str]]:  # noqa: D401 – we like imperative style
     """Yield a pair of ASCII characters.
 
     If *stdin* is True and there is data waiting, pop one byte from STDIN.
@@ -24,10 +33,32 @@ def read_pair(*, stdin: bool = False) -> tuple[str, str]:  # noqa: D401 – we l
     if stdin and not sys.stdin.closed and not sys.stdin.isatty():
         char = sys.stdin.read(1)
         if char:
-            return char[0], next(_cycle)
+            yield char[0], next(_cycle)
+    while True:
+        yield next(_cycle), next(_cycle)
 
-    return next(_cycle), next(_cycle)
+from pathlib import Path
 
-__all__ = ["read_pair"]
+@register("file")
+def file_reader(path: Path = Path("sample.txt")) -> Iterator[tuple[str, str]]:
+    with path.open('r') as f:
+        while True:
+            char = f.read(1)
+            if not char:
+                f.seek(0)  # Loop when EOF
+                continue
+            yield char, next(_cycle)
+
+@register("stdin")
+def stdin_reader() -> Iterator[tuple[str, str]]:
+    while True:
+        if not sys.stdin.closed and not sys.stdin.isatty():
+            char = sys.stdin.read(1)
+            if char:
+                yield char[0], next(_cycle)
+        else:
+            yield next(_cycle), next(_cycle)
+
+__all__ = ["read_pair", "file_reader", "stdin_reader"]
 
 # Fallback to test corpus

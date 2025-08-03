@@ -1,8 +1,10 @@
 import argparse
 from rich.table import Table
 from rich.console import Console
-from seed.core.sense_bus import read_pair
-from seed.core.dyad_engine import delta
+from seed.core.sense_bus import SENSE_REGISTRY
+from seed.core.dyad_engine import load_delta
+from seed.core.metrics import Metrics, start_server
+from seed.plugins import autodiscover_plugins
 from seed.core.boredom import BoredomThermostat
 from seed.core.memory_log import MemoryLog
 from seed.agents.self_test import audit_last
@@ -10,17 +12,34 @@ from seed.agents.self_test import audit_last
 def main():
     parser = argparse.ArgumentParser(description="Run the SeeD CLI.")
     parser.add_argument("--cycles", type=int, default=100, help="Number of cycles to run")
+    parser.add_argument("--sense", type=str, default="default", help="Sense plugin to use")
+    parser.add_argument("--sense-path", type=str, help="Path for file/jsonl modes")
+    parser.add_argument("--delta", type=str, default="ascii", help="Delta plugin to use")
+    parser.add_argument("--metrics-port", type=int, default=8000, help="Port for metrics server (0 to disable)")
     args = parser.parse_args()
+
+    autodiscover_plugins()
+    sense_fn = SENSE_REGISTRY.get(args.sense, SENSE_REGISTRY["default"])
+    delta_fn = load_delta(args.delta)
+
+    if args.metrics_port > 0:
+        start_server(args.metrics_port)
 
     console = Console()
     memory_log = MemoryLog()
     boredom_thermostat = BoredomThermostat()
 
     for cycle in range(1, args.cycles + 1):
-        inp, contrast = read_pair()
-        d = delta(inp, contrast)
+        if args.sense_path and sense_fn.__code__.co_argcount > 0:
+            sense_iter = sense_fn(path=args.sense_path)
+        else:
+            sense_iter = sense_fn()
+        inp, contrast = next(sense_iter)
+        d = delta_fn(inp, contrast)
         flag = boredom_thermostat.update(d)
         event = memory_log.append({"inp": inp, "contrast": contrast, "delta": d, "flag": flag})
+
+        Metrics.increment(flag, d)
 
         if cycle % 5 == 0:
             table = Table(title="Recent Events")

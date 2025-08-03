@@ -23,6 +23,22 @@ To run the SeeD CLI for a specified number of cycles, use:
 poetry run seed-run --cycles 30
 ```
 
+## Plugin Selection
+
+You can choose different Sense and Delta plugins using the `--sense` and `--delta` flags. For example:
+```bash
+poetry run seed-run --cycles 30 --sense jsonl --delta cosine
+```
+
+## Metrics
+
+To enable the metrics server, use the `--metrics-port` flag. For example:
+```bash
+poetry run seed-run --cycles 30 --metrics-port 8000
+```
+
+You can then scrape the metrics by visiting `http://localhost:8000/metrics`.
+
 ## Exporting Logs
 
 To export the event log, use:
