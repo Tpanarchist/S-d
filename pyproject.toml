@@ -7,14 +7,15 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-sqlite3 = "*"
 dataclasses = "*"
-hashlib = "*"
 logging = "*"
 pytest = "*"
 hypothesis = "*"
 rich = "*"
-pydantic = { version = "*", optional = true }
+pydantic = "*"
+
+[tool.poetry.scripts]
+seed-run = "seed.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

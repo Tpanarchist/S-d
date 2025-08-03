@@ -60,10 +60,17 @@ class MemoryLog:
                    VALUES (:ts, :inp, :contrast, :delta, :flag, :hash)""",
                 enriched,
             )
-            lastrowid = cur.lastrowid
-            if lastrowid is None:
-                raise RuntimeError("Failed to retrieve lastrowid after insertion.")
-            return lastrowid
+            return cur.lastrowid
+
+    def get_last_n_events(self, n: int):
+        """Retrieve the last n events from the log."""
+        with self._conn as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT id, inp, contrast, delta, flag FROM events ORDER BY id DESC LIMIT ?",
+                (n,)
+            )
+            return cur.fetchall()
 
     def __del__(self):  # noqa: D401 – destructor to close handle
         try:

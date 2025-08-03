@@ -6,14 +6,7 @@ from typing import Union
 Ascii = Union[str, bytes]
 
 
-def delta(a: Ascii, b: Ascii) -> float:  # noqa: D401
-    """Return a simple Hamming‑distance novelty score between *a* and *b*.
-
-    * If the inputs are exactly equal → 0.0
-    * Otherwise → 1.0  (placeholder for richer metrics later)
-    """
-    if isinstance(a, bytes):
-        a = a.decode()
-    if isinstance(b, bytes):
-        b = b.decode()
-    return 0.0 if a == b else 1.0
+def delta(a: str, b: str) -> float:
+    """0 ≤ Δ ≤ 1 based on ASCII distance."""
+    max_ascii = max(ord(a), ord(b))
+    return abs(ord(a) - ord(b)) / max_ascii
